@@ -25,10 +25,15 @@ fn main() {
     });
 
     // attempt to load the database
-    let company = company::Company::from(config.get_database()).unwrap_or_else(|err| {
+    let mut company = company::Company::from(config.get_database()).unwrap_or_else(|err| {
         eprintln!("Problem loading company database: {}", err);
         process::exit(1);
     });
+
+    //let mut copy_accounts = company.accounts.clone();
+    //println!();
+
+    company.sort_accounts("asc");
 
     for account in company.accounts.iter() {
         println!("{} {:?} {} {} {:?} {}",
@@ -51,6 +56,11 @@ fn main() {
             tranaction.date
         )
     }
+
+    company.write_to(config.get_database()).unwrap_or_else(|err| {
+        eprintln!("Problem saving company database: {}", err);
+        process::exit(1);
+    });
 
     
 
