@@ -2,6 +2,7 @@ use std::process;
 use std::io;
 use std::io::Write;
 use std::env;
+use crossterm::terminal::enable_raw_mode;
 
 extern crate serde;
 #[macro_use]
@@ -16,6 +17,8 @@ mod config;
 mod file_io;
 
 fn main() {
+    //enable_raw_mode().expect("can run in raw mode");
+
 
     // get the arguments from the command line
     let args: Vec<String> = env::args().collect();

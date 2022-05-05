@@ -1,4 +1,27 @@
+// tui is based on tutorial from
+// https://blog.logrocket.com/rust-and-tui-building-a-command-line-interface-in-rust/
+
 use std::io;
+
+enum Event<I> {
+    Input(I),
+    Tick
+}
+
+enum MenuItem {
+    Home,
+    Register
+}
+
+impl From<MenuItem> for usize {
+    fn from(input: MenuItem) -> usize {
+        match input {
+            MenuItem::Home => 0,
+            MenuItem::Register => 1,
+        }
+    }
+}
+
 
 pub fn capture_input<'a>() -> io::Result<String> {
     // see https://doc.rust-lang.org/std/io/struct.Stdin.html
