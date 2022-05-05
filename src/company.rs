@@ -63,6 +63,32 @@ impl Company {
         };        
     }
 
+    pub fn max_id_account(&mut self) -> Result<usize, Box<dyn Error>> {
+        // find the maximum id in the accounts
+        self.sort_accounts("desc");
+        let max_id = self.accounts[0].id.parse::<usize>()?;
+        Ok(max_id)
+    }
+
+    pub fn get_acccount_by_id(&self, id: &str) -> Option<&Account> {
+        let mut account_index: usize = 0;
+        let mut account_found = false;
+
+        for (idx, account) in self.accounts.iter().enumerate() {
+            if account.id == id {
+                account_index = idx;
+                account_found = true;
+            }
+        }
+
+        if account_found {
+            Some(&self.accounts[account_index])
+        }
+        else {
+            None
+        }
+    }
+
 }
 
 // Accounts are entities that have Transactions
@@ -79,12 +105,65 @@ pub struct Account {
 
 impl Account {
 
-    pub fn cmp(&self, another: &Account) -> Ordering{
+    pub fn cmp(&self, another: &Account) -> Ordering {
 
         let first = self.id.parse::<usize>().expect("Bad id ");
         let second = another.id.parse::<usize>().expect("Bad id ");
 
         return first.cmp(&second)
+    }
+
+    pub fn new() -> Self {
+        Account {
+            id: "0".to_string(),
+            subaccounts: Vec::new(),
+            name: "Unnamed".to_string(),
+            r#type: "d".to_string(),
+            transactions: Vec::new(),
+            parent: "0".to_string()
+        }
+    }
+
+    pub fn set_id_in_company(&mut self, company: &mut Company) -> &mut Self{
+        // set the id to be the next highest one in the company
+        let current_max = company.max_id_account().unwrap();
+        self.id = (current_max + 1).to_string();
+
+        self
+    }
+
+    pub fn set_type_in_company(&mut self, r#type: &str, company: &Company) -> &mut Self{
+        // set type as parent if possible, otherwise set as requested
+
+        let good_type = match r#type {
+            "d" => true,
+            "c" => true,
+            _ => false
+        };
+
+        if !good_type {
+            return self;
+        }
+
+        if self.parent == "0" {
+            // at root
+            self.r#type = r#type.to_string();
+        }
+        else {
+            let result = company.get_acccount_by_id(&self.parent[..]);
+            match result {
+                Some(x) => {
+                    println!("parent is {:?}", x);
+                    self.r#type = x.r#type.to_string();
+                },
+                None => {
+                    println!("no parent");
+                    self.r#type = r#type.to_string();
+                },
+            }
+        }
+
+        self
     }
 
 }
