@@ -77,12 +77,13 @@ fn main() {
     //                .set_amount("1002.33")
     //                .set_memo("Hello");
 
-    company.write_to(config.get_database()).unwrap_or_else(|err| {
-        eprintln!("Problem saving company database: {}", err);
-        process::exit(1);
-    });
+    // company.write_to(config.get_database()).unwrap_or_else(|err| {
+    //     eprintln!("Problem saving company database: {}", err);
+    //     process::exit(1);
+    // });
 
-    
+    ui::show_register("1", &company);
+    ui::show_chart_of_accounts(&company);
 
     println!("");
     println!("{}", ui::welcome());

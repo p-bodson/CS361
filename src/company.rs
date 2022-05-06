@@ -153,4 +153,45 @@ impl Company {
         }
     }
 
+    pub fn get_transactions_by_account(&self, account_id: &str) -> Option<Vec<&Transaction>> {
+    
+        let option = self.get_acccount_by_id(account_id);
+
+        if option.is_none() {
+            return None;
+        }
+
+        let account = option.unwrap();
+        let transaction_ids = &account.transactions;
+
+        // convert transaction IDs into transactions
+
+        let mut transactions = Vec::<&Transaction>::with_capacity(transaction_ids.len());
+
+        for element in &self.transactions {
+            for id in transaction_ids {
+                if element.id == *id {
+                    transactions.push(element);
+                }
+            }
+        }
+
+        Some(transactions)
+    }
+
+    pub fn get_accounts(&self) -> Option<Vec<&Account>> {
+        let mut accounts = Vec::<&Account>::with_capacity(self.accounts.len());
+        
+        if self.accounts.len() == 0 {
+            return None;
+        }
+        else {
+            for element in &self.accounts {
+                    accounts.push(element);
+                }
+        }
+
+        Some(accounts)
+    }
+
 }
