@@ -14,8 +14,12 @@ mod ui;
 mod company;
 mod config;
 mod file_io;
+mod account;
+mod transaction;
 
-use crate::company::{Company, Account, Transaction};
+use crate::company::Company;
+use crate::account::Account;
+use crate::transaction::Transaction;
 
 fn main() {
 
@@ -60,12 +64,18 @@ fn main() {
         )
     }
 
-    let mut new_account = Account::new();
-    new_account.set_id_in_company(&mut company)
-               .set_type_in_company("d", &company);
+    // let mut new_account = Account::new();
+    // new_account.set_id_in_company(&mut company)
+    //            .set_parent("2")
+    //            .set_type_in_company("d", &company)
+    //            .set_name("Something");
 
-    println!("new_account: {:?}", new_account);
-
+    // let mut new_transaction = Transaction::new();
+    // new_transaction.set_id_in_company(&mut company)
+    //                .set_credit("1")
+    //                .set_debit("2")
+    //                .set_amount("1002.33")
+    //                .set_memo("Hello");
 
     company.write_to(config.get_database()).unwrap_or_else(|err| {
         eprintln!("Problem saving company database: {}", err);
