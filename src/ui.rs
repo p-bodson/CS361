@@ -1,26 +1,10 @@
-// tui is based on tutorial from
-// https://blog.logrocket.com/rust-and-tui-building-a-command-line-interface-in-rust/
 
 use std::io;
 
-enum Event<I> {
-    Input(I),
-    Tick
-}
+use crate::company::Company;
+use crate::account::Account;
+use crate::transaction::Transaction;
 
-enum MenuItem {
-    Home,
-    Register
-}
-
-impl From<MenuItem> for usize {
-    fn from(input: MenuItem) -> usize {
-        match input {
-            MenuItem::Home => 0,
-            MenuItem::Register => 1,
-        }
-    }
-}
 
 
 pub fn capture_input<'a>() -> io::Result<String> {
@@ -61,4 +45,41 @@ pub fn farewell() -> String {
     format!("{}\n",
         "Thank you, goodbye."
     )
+}
+
+pub fn show_register(account_id: &str, company: &Company) {
+
+    let transactions = company.get_transactions_by_account(account_id);
+
+    if transactions.is_none() {
+        println!("Account_id {} cannot be found", account_id);
+    } 
+    else {
+        println!("Showing register for account_id {}", account_id);
+
+        let transactions = transactions.unwrap();
+
+        for transaction in transactions.iter() {
+            println!("{:?}", transaction);
+        }
+    }
+}
+
+
+pub fn show_chart_of_accounts(company: &Company) {
+
+    let accounts = company.get_accounts();
+
+    if accounts.is_none() {
+        println!("No Accounts To Show");
+    } 
+    else {
+        println!("Showing Chart of Accounts");
+
+        let accounts = accounts.unwrap();
+
+        for account in accounts.iter() {
+            println!("{:?}", account);
+        }
+    }
 }
