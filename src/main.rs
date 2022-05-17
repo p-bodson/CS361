@@ -1,5 +1,4 @@
 use std::process;
-use std::io;
 use std::io::Write;
 use std::env;
 
@@ -16,53 +15,104 @@ mod config;
 mod file_io;
 mod account;
 mod transaction;
+mod crossterm;
+mod app;
 
 use crate::company::Company;
 use crate::account::Account;
 use crate::transaction::Transaction;
 
-fn main() {
+use crate::app::App;
+use crate::crossterm::run_app;
+
+
+use std::{
+    error::Error,
+    io,
+    time::Duration,
+};
+
+use ::crossterm::{
+    event::{self, DisableMouseCapture, EnableMouseCapture},
+    execute,
+    terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
+};
+
+use tui::{
+    Terminal,
+    backend::{Backend, CrosstermBackend},
+};
+
+
+fn main() -> Result<(), Box<dyn Error>> {
+
+    // setup the terminal
+    enable_raw_mode()?;
+    let mut stdout = io::stdout();
+    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(stdout);
+    let mut terminal = Terminal::new(backend)?;
+
+    // create and start app
+    let tick_rate = Duration::from_millis(100);
+    let app = App::default();
+    let res = run_app(&mut terminal, app, tick_rate);
+
+    // restore the terminal
+    disable_raw_mode()?;
+    execute!(
+        terminal.backend_mut(),
+        LeaveAlternateScreen,
+        DisableMouseCapture
+    )?;
+    terminal.show_cursor()?;
+
+    if let Err(err) = res {
+        println!("{:?}", err)
+    }
+
+    Ok(())
 
     // get the arguments from the command line
-    let args: Vec<String> = env::args().collect();
-    let config = config::Config::new(args).unwrap_or_else(|err| {
-        eprintln!("Problem getting user input: {}", err);
-        process::exit(1);
-    });
+    // let args: Vec<String> = env::args().collect();
+    // let config = config::Config::new(args).unwrap_or_else(|err| {
+    //     eprintln!("Problem getting user input: {}", err);
+    //     process::exit(1);
+    // });
 
-    // attempt to load the database
-    let mut company = Company::from(config.get_database()).unwrap_or_else(|err| {
-        eprintln!("Problem loading company database: {}", err);
-        process::exit(1);
-    });
+    // // attempt to load the database
+    // let mut company = Company::from(config.get_database()).unwrap_or_else(|err| {
+    //     eprintln!("Problem loading company database: {}", err);
+    //     process::exit(1);
+    // });
 
     //let mut copy_accounts = company.accounts.clone();
     //println!();
 
-    company.sort_accounts("asc");
+    // company.sort_accounts("asc");
 
-    for account in company.accounts.iter() {
-        println!("{} {} {} {} {:?} {:?}",
-            account.id,  
-            account.name,
-            account.r#type,
-            account.parent,
-            account.transactions,
-            account.subaccounts 
-        )
-    }
+    // for account in company.accounts.iter() {
+    //     println!("{} {} {} {} {:?} {:?}",
+    //         account.id,  
+    //         account.name,
+    //         account.r#type,
+    //         account.parent,
+    //         account.transactions,
+    //         account.subaccounts 
+    //     )
+    // }
 
-    for transaction in company.transactions.iter() {
-        println!("{} {} {} {:?} {} {}",
-            transaction.id,
-            transaction.debit, 
-            transaction.credit,
-            transaction.date,      
-            transaction.amount,
-            transaction.memo
+    // for transaction in company.transactions.iter() {
+    //     println!("{} {} {} {:?} {} {}",
+    //         transaction.id,
+    //         transaction.debit, 
+    //         transaction.credit,
+    //         transaction.date,      
+    //         transaction.amount,
+    //         transaction.memo
 
-        )
-    }
+    //     )
+    // }
 
     // let mut new_account = Account::new();
     // new_account.set_id_in_company(&mut company)
@@ -82,11 +132,11 @@ fn main() {
     //     process::exit(1);
     // });
 
-    ui::show_register("1", &company);
-    ui::show_chart_of_accounts(&company);
+    // ui::show_register("1", &company);
+    // ui::show_chart_of_accounts(&company);
 
-    println!("");
-    println!("{}", ui::welcome());
+    // println!("");
+    // println!("{}", ui::welcome());
 
     // // the interactive mode loop
     // loop {
