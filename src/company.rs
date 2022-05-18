@@ -1,5 +1,7 @@
 use chrono::prelude::*;
 use std::error::Error;
+use std::io;
+use std::path::Path;
 
 use std::cmp::Ordering;
 
@@ -28,11 +30,13 @@ impl Default for Company {
 }
 
 impl Company {
-    pub fn from(db_path: &str) -> Result<Self, Box<dyn Error>> {
-        let db_data = file_io::read(db_path)?;
-        let res: Company = serde_json::from_str(&db_data[..])?;
+    pub fn load<T>(mut self, db_path: T) -> io::Result<Self>
+    where T: AsRef<Path>
+    {
+        let data = file_io::read(db_path)?;
+        self = serde_json::from_str(&data[..])?;
 
-        Ok(res)
+        Ok(self)
     }
 
     pub fn write_to(&self, db_path: &str) -> Result<(), Box<dyn Error>> {

@@ -4,14 +4,14 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct Args {
-    #[clap(short = 'd', long, default_value = "../data/db.json")]
+    #[clap(short = 'd', long, default_value = "data/db.json")]
     pub database: String,
     
     #[clap(short = 't', long, default_value = "200")]
     pub tick_rate: u64
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Config {
     pub database: PathBuf,
     pub tick_rate: Duration,

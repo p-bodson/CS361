@@ -54,7 +54,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create and start app
-    let app = App::default();
+    let app = App::default()
+        .database(config.database.clone());
     let res = run_app(&mut terminal, app, config);
 
     // restore the terminal

@@ -30,9 +30,7 @@ pub fn run_app<B: Backend>(
     let mut last_tick = Instant::now();
 
     // attempt to load the database
-    //let mut company = Company::from(config.get_database()).unwrap_or_else(|err| {
-    //    eprintln!("Problem loading company database: {}", err);
-    //});
+    let mut app = app.load_company()?;
 
     loop {
 
