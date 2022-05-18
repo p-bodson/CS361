@@ -1,23 +1,16 @@
-
 use std::{
     error::Error,
     io,
     time::{Duration, Instant}
 };
 
-use crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture, Event, KeyCode},
-    execute,
-    terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
-};
-
 use tui::{
-    Terminal, Frame,
-    backend::{Backend, CrosstermBackend},
+    Frame,
+    backend::Backend,
     style::{Color, Modifier, Style},
-    layout::{Alignment, Constraint, Direction, Layout},
+    layout::{Alignment, Constraint, Direction, Layout, Rect},
     text::{Span, Spans, Text},
-    widgets::{Block, BorderType, Borders, ListItem, Paragraph, List, Gauge},
+    widgets::{Block, BorderType, Borders, ListItem, Paragraph, List, Gauge, Wrap},
 };
 
 use unicode_width::UnicodeWidthStr;
@@ -46,20 +39,6 @@ pub fn welcome() -> String {
         "Welcome to Money, the double-entry ledger app for counting your wealth.",
         "Type the letter in the parentheses to perform the corresponding feature."
     )      
-}
-
-pub fn features() -> String {
-    format!("{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n{}\n",
-        "====================================================",
-        "    Features:",
-        "    (b) List the current balance for your portfolio",
-        "    (t) Enter a new transaction",
-        "    (r) Examine the register for an account",
-        "    (p) See the Profit and Loss for a time period",
-        "    (l) List the chart of accounts",
-        "    (q) Quit the program",
-        "===================================================="
-    )
 }
 
 pub fn farewell() -> String {
@@ -120,6 +99,27 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         )
         .split(f.size());
 
+    draw_text(f, app, chunks[0]);
+    draw_input(f, app, chunks[1]);
+    draw_messages(f, app, chunks[2]);
+    draw_gauges(f, app, chunks[3]);
+}
+
+fn draw_text<B>(f: &mut Frame<B>, app: &App, area: Rect) 
+where
+    B: Backend,
+{
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(0)
+        .constraints(
+            [
+                Constraint::Percentage(100), 
+            ].as_ref(),
+        )
+        .split(area);
+
     let (msg, style) = match app.input_mode {
         InputMode::Normal => (
             vec![
@@ -146,14 +146,61 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
     text.patch_style(style);
     let help_message = Paragraph::new(text);
     f.render_widget(help_message, chunks[0]);
+}
+
+fn draw_gauges<B>(f: &mut Frame<B>, app: &App, area: Rect) 
+where
+    B: Backend,
+{
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(0)
+        .constraints(
+            [
+                Constraint::Percentage(100), 
+            ].as_ref(),
+        )
+        .split(area);
+
+    let label = Span::styled(
+        format!("{:.2}%", app.progress * 100.0),
+        Style::default()
+            .fg(Color::Red)
+            .add_modifier(Modifier::ITALIC | Modifier::BOLD),
+    );
+    let gauge = Gauge::default()
+        .block(Block::default().title("Gauge1").borders(Borders::ALL))
+        .gauge_style(Style::default().fg(Color::Yellow))
+        .ratio(app.progress)
+        .label(label)
+        .use_unicode(true);
+    f.render_widget(gauge, chunks[0]);
+}
+
+fn draw_input<B>(f: &mut Frame<B>, app: &App, area: Rect) 
+where
+    B: Backend,
+{
+
+    let chunks = Layout::default()
+        .direction(Direction::Vertical)
+        .margin(0)
+        .constraints(
+            [
+                Constraint::Percentage(100), 
+            ].as_ref(),
+        )
+        .split(area);
+
 
     let input = Paragraph::new(app.input.as_ref())
-        .style(match app.input_mode {
-            InputMode::Normal => Style::default(),
-            InputMode::Editing => Style::default().fg(Color::Yellow),
-        })
-        .block(Block::default().borders(Borders::ALL).title("Input"));
-    f.render_widget(input, chunks[1]);
+    .style(match app.input_mode {
+        InputMode::Normal => Style::default(),
+        InputMode::Editing => Style::default().fg(Color::Yellow),
+    })
+    .block(Block::default().borders(Borders::ALL).title("Input"));
+    f.render_widget(input, chunks[0]);
+
     match app.input_mode {
         InputMode::Normal =>
             // hide cursor. frame does by default
@@ -162,11 +209,38 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
         InputMode::Editing => {
             // show cursor and place at specific coordinates
             f.set_cursor(
-                chunks[1].x + app.input.width() as u16 +1,
-                chunks[1].y + 1,
+                chunks[0].x + app.input.width() as u16 +1,
+                chunks[0].y + 1,
             )
         }
     }
+}
+
+fn draw_messages<B>(f: &mut Frame<B>, app: &App, area: Rect) 
+where
+    B: Backend,
+{
+    let chunks = Layout::default()
+        .direction(Direction::Horizontal)
+        .margin(0)
+        .constraints(
+            [
+                Constraint::Length(55),
+                Constraint::Min(10),
+                Constraint::Length(55),
+            ].as_ref(),
+        )
+        .split(area);
+
+    let mut text = Text::from("(b) List the current balance for your portfolio\n");
+    text.extend(Text::raw("(t) Enter a new transaction\n"));
+    text.extend(Text::raw("(r) Examine the register for an account\n"));
+    text.extend(Text::raw("(p) See the Profit and Loss for a time period\n"));
+    text.extend(Text::raw("(l) List the chart of accounts\n"));
+    text.extend(Text::raw("(q) Quit the program\n"));
+
+    let menu = Paragraph::new(text);
+    f.render_widget(menu, chunks[0]);
 
 
     let messages: Vec<ListItem> = app
@@ -181,45 +255,13 @@ pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
 
     let messages = 
         List::new(messages).block(Block::default().borders(Borders::ALL).title("Messages").border_type(BorderType::Thick));
-    f.render_widget(messages, chunks[2]);
+    f.render_widget(messages, chunks[1]);
 
 
-    let gauge_chunks = Layout::default()
-        .direction(Direction::Horizontal)
-        .margin(0)
-        .constraints(
-            [
-                Constraint::Percentage(50), 
-                Constraint::Percentage(50), 
-            ].as_ref(),
-        )
-        .split(chunks[3]);
-
-    let label = Span::styled(
-        format!("{:.2}%", app.progress * 100.0),
-        Style::default()
-            .fg(Color::Red)
-            .add_modifier(Modifier::ITALIC | Modifier::BOLD),
-    );
-    let gauge = Gauge::default()
-        .block(Block::default().title("Gauge1").borders(Borders::ALL))
-        .gauge_style(Style::default().fg(Color::Yellow))
-        .ratio(app.progress)
-        .label(label)
-        .use_unicode(true);
-    f.render_widget(gauge, gauge_chunks[0]);
-
-    let label = Span::styled(
-        format!("{:.2}%", app.progress * 100.0),
-        Style::default()
-            .fg(Color::Cyan)
-            .add_modifier(Modifier::ITALIC | Modifier::BOLD),
-    );
-    let gauge = Gauge::default()
-        .block(Block::default().title("Gauge2").borders(Borders::ALL))
-        .gauge_style(Style::default().fg(Color::Red))
-        .ratio(app.progress)
-        .label(label)
-        .use_unicode(true);
-    f.render_widget(gauge, gauge_chunks[1]);
+    // print out the accounts in a window
+    let text = Text::from("ssjdfjdfjasdklfasjdfklasdflkasdfjlqwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq kasf asdf klasdfklaf kl  jklsd jkl d sfl jksdf  jklsdf ajl ksdf jl ksf  jkl ");
+    let viewer = Paragraph::new(text)
+        .block(Block::default().title("Viewer").borders(Borders::ALL))
+        .wrap(Wrap { trim: false});
+    f.render_widget(viewer, chunks[2]);
 }

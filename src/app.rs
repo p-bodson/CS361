@@ -1,3 +1,7 @@
+use std::path::{Path, PathBuf};
+use crate::company::Company;
+
+
 pub enum InputMode {
     Normal,
     Editing,
@@ -8,6 +12,8 @@ pub struct App {
     pub input_mode: InputMode,
     pub messages: Vec<String>,
     pub progress: f64,
+    pub db_path: PathBuf,
+    pub company: Company,
 }
 
 impl Default for App {
@@ -17,6 +23,8 @@ impl Default for App {
             input_mode: InputMode::Normal,
             messages: Vec::new(),
             progress: 0.0,
+            db_path: PathBuf::new(),
+            company: Company::default(),
         }
     }
 }

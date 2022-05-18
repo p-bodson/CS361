@@ -1,30 +1,42 @@
-// see https://doc.rust-lang.org/std/collections/struct.HashMap.html
-// on using HashMaps
-use std::collections::HashMap;
-use std::error::Error;
+use clap::Parser;
+use std::time::Duration;
+use std::path::PathBuf;
+
+#[derive(Debug, Parser)]
+pub struct Args {
+    #[clap(short = 'd', long, default_value = "../data/db.json")]
+    pub database: String,
+    
+    #[clap(short = 't', long, default_value = "200")]
+    pub tick_rate: u64
+}
 
 #[derive(Debug)]
 pub struct Config {
-    database: String,
+    pub database: PathBuf,
+    pub tick_rate: Duration,
 }
 
 impl Config {
-    pub fn new(args: Vec<String>) -> Result<Self, Box<dyn Error>> {
-        let arg_values = Config::parse_args(&args)?;
-        let database = &arg_values["database"];
-
-        Ok(Config {
-            database: database.to_string(),
-        })
+    pub fn tick_rate(mut self, rate: u64) -> Config
+    {
+        self.tick_rate = Duration::from_millis(rate);
+        self
     }
 
-    pub fn get_database(&self) -> &str {
-        &self.database[..]
+    pub fn database<T>(mut self, path: T) -> Config
+    where T: Into<PathBuf>
+    {
+        self.database = PathBuf::from(path.into());
+        self
     }
+}
 
-    fn parse_args(args: &Vec<String>) -> Result<HashMap<String, &String>, Box<dyn Error>> {           
-        let mut arg_values = HashMap::new();
-        arg_values.insert("database".to_string(), &args[1]);
-        Ok(arg_values)
+impl Default for Config {
+    fn default() -> Config {
+        Config {
+            database: PathBuf::new(),
+            tick_rate: Duration::new(0, 0),
+        }
     }
 }

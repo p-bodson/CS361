@@ -18,6 +18,15 @@ pub struct Company {
     pub transactions: Vec<Transaction>
 }
 
+impl Default for Company {
+    fn default() -> Company {
+        Company {
+            accounts: Vec::new(),
+            transactions: Vec::new(),
+        }
+    }
+}
+
 impl Company {
     pub fn from(db_path: &str) -> Result<Self, Box<dyn Error>> {
         let db_data = file_io::read(db_path)?;

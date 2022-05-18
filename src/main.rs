@@ -1,7 +1,3 @@
-use std::process;
-use std::io::Write;
-use std::env;
-
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
@@ -18,33 +14,37 @@ mod transaction;
 mod crossterm;
 mod app;
 
-use crate::company::Company;
-use crate::account::Account;
-use crate::transaction::Transaction;
-
-use crate::app::App;
-use crate::crossterm::run_app;
-
-
 use std::{
     error::Error,
     io,
     time::Duration,
 };
-
 use ::crossterm::{
-    event::{self, DisableMouseCapture, EnableMouseCapture},
+    event::{DisableMouseCapture, EnableMouseCapture},
     execute,
     terminal::{enable_raw_mode, disable_raw_mode, EnterAlternateScreen, LeaveAlternateScreen},
 };
-
 use tui::{
     Terminal,
-    backend::{Backend, CrosstermBackend},
+    backend::CrosstermBackend,
 };
+
+use clap::Parser;
+
+use crate::company::Company;
+use crate::account::Account;
+use crate::transaction::Transaction;
+use crate::app::App;
+use crate::crossterm::run_app;
+use crate::config::{Config, Args};
 
 
 fn main() -> Result<(), Box<dyn Error>> {
+
+    let args = Args::parse();
+    let config = Config::default()
+        .database(args.database)
+        .tick_rate(args.tick_rate);
 
     // setup the terminal
     enable_raw_mode()?;
@@ -54,9 +54,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     let mut terminal = Terminal::new(backend)?;
 
     // create and start app
-    let tick_rate = Duration::from_millis(100);
     let app = App::default();
-    let res = run_app(&mut terminal, app, tick_rate);
+    let res = run_app(&mut terminal, app, config);
 
     // restore the terminal
     disable_raw_mode()?;
@@ -72,13 +71,6 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
-
-    // get the arguments from the command line
-    // let args: Vec<String> = env::args().collect();
-    // let config = config::Config::new(args).unwrap_or_else(|err| {
-    //     eprintln!("Problem getting user input: {}", err);
-    //     process::exit(1);
-    // });
 
     // // attempt to load the database
     // let mut company = Company::from(config.get_database()).unwrap_or_else(|err| {
@@ -140,8 +132,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // // the interactive mode loop
     // loop {
-    //     println!("{}", ui::features());
-
     //     // capture user input
 
     //     print!("> ");
