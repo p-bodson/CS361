@@ -65,25 +65,6 @@ pub fn show_register(account_id: &str, company: &Company) {
     }
 }
 
-
-pub fn show_chart_of_accounts(company: &Company) {
-
-    let accounts = company.get_accounts();
-
-    if accounts.is_none() {
-        println!("No Accounts To Show");
-    } 
-    else {
-        println!("Showing Chart of Accounts");
-
-        let accounts = accounts.unwrap();
-
-        for account in accounts.iter() {
-            println!("{:?}", account);
-        }
-    }
-}
-
 pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
 
     let chunks = Layout::default()
@@ -260,31 +241,54 @@ where
 
 
     // print out the accounts in a window
-
-    let mut text = Text::from("");
-
-    if app.focus == Focus::Charts {
-        text.extend(Text::raw("Chart of Accounts"));
-        let chart = app.company.get_chart_of_accounts().unwrap();
-        for listing in chart {
-            let mut line = String::new();
-            let mut first = true;
-            for account in listing {
-                if first {
-                    line = format!("{}", account.name);
-                    first = false;
-                }
-                else {
-                    line = format!("{} -> {}", account.name, line );
-                }
-    
-            }
-            text.extend(Text::raw(line));
-        }
-    }
-
+    let text = fill_viewer(app);
     let viewer = Paragraph::new(text)
         .block(Block::default().title("Viewer").borders(Borders::ALL))
         .wrap(Wrap { trim: false});
     f.render_widget(viewer, chunks[1]);
+}
+
+fn fill_viewer(app: &App) -> Text {
+
+    let mut text = Text::from("");
+
+    match app.focus {
+        Focus::Charts => {
+            text.extend(Text::raw("Chart of Accounts"));
+            let chart = app.company.get_chart_of_accounts().unwrap();
+            for listing in chart {
+                let mut line = String::new();
+                let mut first = true;
+                for account in listing {
+                    if first {
+                        line = format!("{}", account.name);
+                        first = false;
+                    }
+                    else {
+                        line = format!("{} -> {}", account.name, line );
+                    }
+        
+                }
+                text.extend(Text::raw(line));
+            }
+        },
+        Focus::ExpenseReport => {
+            text.extend(Text::raw("Generating Expense Report"));
+        },
+        Focus::BalanceSheet => {
+            text.extend(Text::raw("List the current balance for your portfolio"));
+        },
+        Focus::NewTransaction => {
+            text.extend(Text::raw("Enter a new transaction"));
+        },
+        Focus::Register => {
+            text.extend(Text::raw("Examine the register for an account"));
+        },
+        Focus::ProfitAndLoss => {
+            text.extend(Text::raw("See the Profit and Loss for a time period"));
+        },
+        Focus::Nothing => {},
+    }
+
+    text
 }

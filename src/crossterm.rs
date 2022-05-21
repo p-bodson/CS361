@@ -30,7 +30,7 @@ pub fn run_app<B: Backend>(
     let mut last_tick = Instant::now();
 
     // attempt to load the database
-    let mut app = app.load_company()?;
+    app = app.load_company()?;
 
     loop {
 
@@ -55,6 +55,21 @@ pub fn run_app<B: Backend>(
                         }
                         KeyCode::Char('l') => {
                             app.toggle_focus(Focus::Charts);
+                        }
+                        KeyCode::Char('g') => {
+                            app.toggle_focus(Focus::ExpenseReport);
+                        }
+                        KeyCode::Char('b') => {
+                            app.toggle_focus(Focus::BalanceSheet);
+                        }
+                        KeyCode::Char('t') => {
+                            app.toggle_focus(Focus::NewTransaction);
+                        }
+                        KeyCode::Char('r') => {
+                            app.toggle_focus(Focus::Register);
+                        }
+                        KeyCode::Char('p') => {
+                            app.toggle_focus(Focus::ProfitAndLoss);
                         }
                         _ => {}
                     },

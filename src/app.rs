@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::{PathBuf};
 use crate::company::Company;
 use std::io;
 
@@ -12,6 +12,10 @@ pub enum Focus {
     Nothing,
     Charts,
     ExpenseReport,
+    BalanceSheet,
+    NewTransaction,
+    Register,
+    ProfitAndLoss,
 }
 
 pub struct App {

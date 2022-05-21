@@ -17,7 +17,6 @@ mod app;
 use std::{
     error::Error,
     io,
-    time::Duration,
 };
 use ::crossterm::{
     event::{DisableMouseCapture, EnableMouseCapture},
