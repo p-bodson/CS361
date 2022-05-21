@@ -260,24 +260,27 @@ where
 
     // print out the accounts in a window
 
-    let mut text = Text::from("Chart of Accounts");
-    let chart = app.company.get_chart_of_accounts().unwrap();
-    for listing in chart {
-        let mut line = String::new();
-        let mut first = true;
-        for account in listing {
-            if first {
-                line = format!("{}", account.name);
-                first = false;
-            }
-            else {
-                line = format!("{} -> {}", account.name, line );
-            }
+    let mut text = Text::from("");
 
+    if app.show_charts {
+        text.extend(Text::raw("Chart of Accounts"));
+        let chart = app.company.get_chart_of_accounts().unwrap();
+        for listing in chart {
+            let mut line = String::new();
+            let mut first = true;
+            for account in listing {
+                if first {
+                    line = format!("{}", account.name);
+                    first = false;
+                }
+                else {
+                    line = format!("{} -> {}", account.name, line );
+                }
+    
+            }
+            text.extend(Text::raw(line));
         }
-        text.extend(Text::raw(line));
     }
-
 
     let viewer = Paragraph::new(text)
         .block(Block::default().title("Viewer").borders(Borders::ALL))

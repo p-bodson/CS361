@@ -53,6 +53,9 @@ pub fn run_app<B: Backend>(
                         KeyCode::Char('q') => {
                             return Ok(());
                         }
+                        KeyCode::Char('l') => {
+                            app.show_charts = !app.show_charts;
+                        }
                         _ => {}
                     },
                     InputMode::Editing => match key.code {

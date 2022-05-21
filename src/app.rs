@@ -14,6 +14,7 @@ pub struct App {
     pub progress: f64,
     pub db_path: PathBuf,
     pub company: Company,
+    pub show_charts: bool,
 }
 
 impl Default for App {
@@ -25,6 +26,7 @@ impl Default for App {
             progress: 0.0,
             db_path: PathBuf::new(),
             company: Company::default(),
+            show_charts: false,
         }
     }
 }
