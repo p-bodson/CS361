@@ -73,12 +73,6 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     Ok(())
 
-    // // attempt to load the database
-    // let mut company = Company::from(config.get_database()).unwrap_or_else(|err| {
-    //     eprintln!("Problem loading company database: {}", err);
-    //     process::exit(1);
-    // });
-
     //let mut copy_accounts = company.accounts.clone();
     //println!();
 
@@ -131,38 +125,4 @@ fn main() -> Result<(), Box<dyn Error>> {
     // println!("");
     // println!("{}", ui::welcome());
 
-    // // the interactive mode loop
-    // loop {
-    //     // capture user input
-
-    //     print!("> ");
-    //     // see https://doc.rust-lang.org/std/macro.print.html
-    //     // on flushing stdout
-    //     io::stdout().flush().unwrap();
-
-    //     let command: String = ui::capture_input().unwrap_or_else(|err| {
-    //         eprintln!("Problem getting user input: {}", err);
-    //         process::exit(1);
-    //     }).split_whitespace().collect();
-
-
-    //     if command == "q" {
-    //         println!("");
-    //         print!("{}", ui::farewell());
-    //         break;
-    //     }
-
-    //     match &command[..] {
-    //         "b" => println!("{}: printing balance sheet", command),
-    //         "t" => println!("{}: entering a transaction", command),
-    //         "r" => println!("{}: querying a register", command),
-    //         "p" => println!("{}: printing an income statement", command),
-    //         "l" => println!("{}: listing the chart of accounts", command),
-    //         _   => { 
-    //             println!{"I don't know that command, please see the Features for the known commands."};
-    //             continue;
-    //         },
-    //     }
-        
-    // }
 }

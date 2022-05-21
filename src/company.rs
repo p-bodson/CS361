@@ -207,4 +207,35 @@ impl Company {
         Some(accounts)
     }
 
+    pub fn get_chart_of_accounts(&self) -> Option<Vec<Vec<&Account>>> {
+        let accounts = self.get_accounts();
+
+        if accounts.is_none() {
+            return None;
+        }
+        
+        let accounts = accounts.unwrap();
+
+        // structure the accounts from root (id = 0) by id
+        // then dereference the ids into accounts
+
+        let mut chart = Vec::<Vec::<&Account>>::with_capacity(accounts.len());
+        
+        for account in &accounts {
+            let mut start = Vec::<&Account>::new();
+            start.push(&account);
+            chart.push(start);
+        }
+
+        for account in &mut chart {
+            let mut parent = &account[0].parent[..];
+            while parent != "0" {
+                account.push(self.get_acccount_by_id(parent).unwrap());
+                parent = &account[account.len() - 1].parent[..]
+            }
+        }
+
+        Some(chart)
+    }
+
 }

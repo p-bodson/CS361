@@ -255,13 +255,32 @@ where
 
     let messages = 
         List::new(messages).block(Block::default().borders(Borders::ALL).title("Messages").border_type(BorderType::Thick));
-    f.render_widget(messages, chunks[1]);
+    f.render_widget(messages, chunks[2]);
 
 
     // print out the accounts in a window
-    let text = Text::from("ssjdfjdfjasdklfasjdfklasdflkasdfjlqwqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq kasf asdf klasdfklaf kl  jklsd jkl d sfl jksdf  jklsdf ajl ksdf jl ksf  jkl ");
+
+    let mut text = Text::from("Chart of Accounts");
+    let chart = app.company.get_chart_of_accounts().unwrap();
+    for listing in chart {
+        let mut line = String::new();
+        let mut first = true;
+        for account in listing {
+            if first {
+                line = format!("{}", account.name);
+                first = false;
+            }
+            else {
+                line = format!("{} -> {}", account.name, line );
+            }
+
+        }
+        text.extend(Text::raw(line));
+    }
+
+
     let viewer = Paragraph::new(text)
         .block(Block::default().title("Viewer").borders(Borders::ALL))
         .wrap(Wrap { trim: false});
-    f.render_widget(viewer, chunks[2]);
+    f.render_widget(viewer, chunks[1]);
 }
