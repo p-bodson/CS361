@@ -7,6 +7,13 @@ pub enum InputMode {
     Editing,
 }
 
+#[derive(PartialEq)]
+pub enum Focus {
+    Nothing,
+    Charts,
+    ExpenseReport,
+}
+
 pub struct App {
     pub input: String,
     pub input_mode: InputMode,
@@ -14,7 +21,7 @@ pub struct App {
     pub progress: f64,
     pub db_path: PathBuf,
     pub company: Company,
-    pub show_charts: bool,
+    pub focus: Focus,
 }
 
 impl Default for App {
@@ -26,12 +33,22 @@ impl Default for App {
             progress: 0.0,
             db_path: PathBuf::new(),
             company: Company::default(),
-            show_charts: false,
+            focus: Focus::Nothing,
         }
     }
 }
 
 impl App {
+    pub fn toggle_focus(&mut self, focus: Focus) {
+        if self.focus == focus {
+            self.focus = Focus::Nothing;
+        }
+        else {
+            self.focus = focus;
+        }
+
+    }
+
     pub fn on_tick(&mut self) {
         self.progress += 0.01;
         if self.progress > 1.0 {

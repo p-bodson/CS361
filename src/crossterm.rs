@@ -16,7 +16,7 @@ use std::{
     time::{Duration, Instant}
 };
 
-use crate::app::{App, InputMode};
+use crate::app::{App, InputMode, Focus};
 use crate::ui::ui;
 use crate::config::Config;
 
@@ -54,7 +54,7 @@ pub fn run_app<B: Backend>(
                             return Ok(());
                         }
                         KeyCode::Char('l') => {
-                            app.show_charts = !app.show_charts;
+                            app.toggle_focus(Focus::Charts);
                         }
                         _ => {}
                     },

@@ -238,4 +238,14 @@ impl Company {
         Some(chart)
     }
 
+    pub fn generate_expense_report(&self) -> Result<(), Box<dyn Error>> {
+        // this function communicates an external service to generate
+        // an expense resport based on the database JSON file.
+        // the networking library used is ZMQ
+        // the microservice returns the path to the created report
+
+
+        Ok(())
+    }
+
 }

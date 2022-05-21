@@ -18,7 +18,7 @@ use unicode_width::UnicodeWidthStr;
 use crate::company::Company;
 use crate::account::Account;
 use crate::transaction::Transaction;
-use crate::app::{App, InputMode};
+use crate::app::{App, InputMode, Focus};
 
 
 pub fn capture_input<'a>() -> io::Result<String> {
@@ -237,6 +237,7 @@ where
     text.extend(Text::raw("(r) Examine the register for an account\n"));
     text.extend(Text::raw("(p) See the Profit and Loss for a time period\n"));
     text.extend(Text::raw("(l) List the chart of accounts\n"));
+    text.extend(Text::raw("(g) Generate an expense report\n"));
     text.extend(Text::raw("(q) Quit the program\n"));
 
     let menu = Paragraph::new(text);
@@ -262,7 +263,7 @@ where
 
     let mut text = Text::from("");
 
-    if app.show_charts {
+    if app.focus == Focus::Charts {
         text.extend(Text::raw("Chart of Accounts"));
         let chart = app.company.get_chart_of_accounts().unwrap();
         for listing in chart {
