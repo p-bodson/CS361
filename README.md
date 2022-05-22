@@ -10,11 +10,12 @@ from https://www.ledger-cli.org/
 The goal of creating this ledger program, however, is to uphold the 
 Cognitive Style Heuristics, and utilize a microservice architecture.
 
-The base program is the ledger that connects to a relational database (sqlite)
-to record transactions.
+The base program is the ledger that a JSON file containing the accounts
+and transactions.
 
-The basic features are viewing a balance, a register of an account, 
-and a profit/loss between two dates.
+The basic features are viewing a balance, the chart of accounts, 
+and a register of an account.  One can also add and delete
+transactions and accounts.
 
 ## CSH
 
