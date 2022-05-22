@@ -36,7 +36,7 @@ pub fn run_app<B: Backend>(
 
         // drawing wants a closure to draw a frame each call.
         // include the state to draw with the closure
-        terminal.draw(|f| ui(f, &app))?;
+        terminal.draw(|f| ui(f, &mut app))?;
 
         
         let timeout = config.tick_rate

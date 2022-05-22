@@ -1,7 +1,8 @@
 use chrono::prelude::*;
 use std::error::Error;
 use std::io;
-use std::path::Path;
+use std::path::{Path, PathBuf};
+use zmq;
 
 use std::cmp::Ordering;
 
@@ -238,14 +239,49 @@ impl Company {
         Some(chart)
     }
 
-    pub fn generate_expense_report(&self) -> Result<(), Box<dyn Error>> {
+    pub fn generate_expense_report<T>(&self, db_path: T) -> Result<Option<PathBuf>, Box<dyn Error>>
+        where T: AsRef<Path>
+    {
+
         // this function communicates an external service to generate
         // an expense resport based on the database JSON file.
         // the networking library used is ZMQ
         // the microservice returns the path to the created report
+        let ctx = zmq::Context::new();
+    
+        let socket = ctx.socket(zmq::REQ)?;
+        socket.connect("tcp://127.0.0.1:6000")?;
 
+        let mut msg = zmq::Message::new();
 
-        Ok(())
+        let payload = file_io::read(db_path)?;
+        socket.send(&payload, 0)?;
+        socket.recv(&mut msg, 0)?;
+
+        let path = msg.as_str();
+
+        if path.is_some() {
+            let path = path.unwrap();
+            let report_location = PathBuf::from(format!("{}", path));
+            let mut result = report_location.clone();
+
+            // convert service string in an appropriate path regardless of OS
+            let filename = report_location.file_name();
+            if filename.is_some() {
+                let filename = filename.unwrap().to_str().unwrap();
+                let mut split = filename.split("\\");
+                result.pop();
+                for name in split {
+                    result.push(name);
+                }
+            }
+
+            return Ok(Some(result))
+        }
+        else {
+            return Ok(None);
+        }
+
     }
 
 }

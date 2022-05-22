@@ -1,7 +1,8 @@
 use std::{
     error::Error,
     io,
-    time::{Duration, Instant}
+    time::{Duration, Instant},
+    path::PathBuf,
 };
 
 use tui::{
@@ -65,7 +66,7 @@ pub fn show_register(account_id: &str, company: &Company) {
     }
 }
 
-pub fn ui<B: Backend>(f: &mut Frame<B>, app: &App) {
+pub fn ui<B: Backend>(f: &mut Frame<B>, app: &mut App) {
 
     let chunks = Layout::default()
         .direction(Direction::Vertical)
@@ -197,7 +198,7 @@ where
     }
 }
 
-fn draw_messages<B>(f: &mut Frame<B>, app: &App, area: Rect) 
+fn draw_messages<B>(f: &mut Frame<B>, app: &mut App, area: Rect) 
 where
     B: Backend,
 {
@@ -248,7 +249,7 @@ where
     f.render_widget(viewer, chunks[1]);
 }
 
-fn fill_viewer(app: &App) -> Text {
+fn fill_viewer(app: &mut App) -> Text {
 
     let mut text = Text::from("");
 
@@ -273,7 +274,34 @@ fn fill_viewer(app: &App) -> Text {
             }
         },
         Focus::ExpenseReport => {
-            text.extend(Text::raw("Generating Expense Report"));
+
+            if !app.report_gen_done {
+                text.extend(Text::raw("Generating Expense Report at"));
+                let res = app.company.generate_expense_report(&app.db_path);
+                if res.is_err() {
+                    text.extend(Text::raw("error generating report")); 
+                }
+                else {
+                    let res = res.unwrap();
+                    if res.is_none() {
+                        text.extend(Text::raw("No Path To Report")); 
+                    }
+                    else {
+                        let path = res.unwrap();
+                        app.report_path = path.clone();
+                        text.extend(Text::raw(format!("{}", path.display())));
+                        text.extend(Text::raw("Locate the expense report at the above path"));
+                    }
+
+                }
+                app.report_gen_done = true;
+            }
+            else {
+                text.extend(Text::raw("Path to report is ..."));
+                let path = app.report_path.clone();
+                text.extend(Text::raw(format!("{}", path.display())));
+            }
+
         },
         Focus::BalanceSheet => {
             text.extend(Text::raw("List the current balance for your portfolio"));
@@ -287,7 +315,9 @@ fn fill_viewer(app: &App) -> Text {
         Focus::ProfitAndLoss => {
             text.extend(Text::raw("See the Profit and Loss for a time period"));
         },
-        Focus::Nothing => {},
+        Focus::Nothing => {
+            app.report_gen_done = false;
+        },
     }
 
     text

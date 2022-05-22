@@ -26,6 +26,8 @@ pub struct App {
     pub db_path: PathBuf,
     pub company: Company,
     pub focus: Focus,
+    pub report_gen_done: bool,
+    pub report_path: PathBuf,
 }
 
 impl Default for App {
@@ -38,6 +40,8 @@ impl Default for App {
             db_path: PathBuf::new(),
             company: Company::default(),
             focus: Focus::Nothing,
+            report_gen_done: false,
+            report_path: PathBuf::new(),
         }
     }
 }
