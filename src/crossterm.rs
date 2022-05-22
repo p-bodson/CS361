@@ -68,8 +68,8 @@ pub fn run_app<B: Backend>(
                         KeyCode::Char('r') => {
                             app.toggle_focus(Focus::Register);
                         }
-                        KeyCode::Char('p') => {
-                            app.toggle_focus(Focus::ProfitAndLoss);
+                        KeyCode::Char('d') => {
+                            app.toggle_focus(Focus::DeleteTransaction);
                         }
                         _ => {}
                     },

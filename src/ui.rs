@@ -217,7 +217,7 @@ where
     let mut text = Text::from("(b) List the current balance for your portfolio\n");
     text.extend(Text::raw("(t) Enter a new transaction\n"));
     text.extend(Text::raw("(r) Examine the register for an account\n"));
-    text.extend(Text::raw("(p) See the Profit and Loss for a time period\n"));
+    text.extend(Text::raw("(d) Delete a transaction\n"));
     text.extend(Text::raw("(l) List the chart of accounts\n"));
     text.extend(Text::raw("(g) Generate an expense report\n"));
     text.extend(Text::raw("(q) Quit the program\n"));
@@ -312,8 +312,8 @@ fn fill_viewer(app: &mut App) -> Text {
         Focus::Register => {
             text.extend(Text::raw("Examine the register for an account"));
         },
-        Focus::ProfitAndLoss => {
-            text.extend(Text::raw("See the Profit and Loss for a time period"));
+        Focus::DeleteTransaction => {
+            text.extend(Text::raw("Deleting Transaction"));
         },
         Focus::Nothing => {
             app.report_gen_done = false;

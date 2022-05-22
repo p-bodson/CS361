@@ -15,7 +15,7 @@ pub enum Focus {
     BalanceSheet,
     NewTransaction,
     Register,
-    ProfitAndLoss,
+    DeleteTransaction,
 }
 
 pub struct App {
