@@ -182,10 +182,10 @@ impl Company {
 
         let mut transactions = Vec::<&Transaction>::with_capacity(transaction_ids.len());
 
-        for element in &self.transactions {
+        for transaction in &self.transactions {
             for id in transaction_ids {
-                if element.id == *id {
-                    transactions.push(element);
+                if transaction.id == *id {
+                    transactions.push(transaction);
                 }
             }
         }
@@ -242,20 +242,18 @@ impl Company {
     pub fn generate_expense_report<T>(&self, db_path: T) -> Result<Option<PathBuf>, Box<dyn Error>>
         where T: AsRef<Path>
     {
-
         // this function communicates an external service to generate
         // an expense resport based on the database JSON file.
         // the networking library used is ZMQ
         // the microservice returns the path to the created report
         let ctx = zmq::Context::new();
-    
         let socket = ctx.socket(zmq::REQ)?;
         socket.connect("tcp://127.0.0.1:6000")?;
 
-        let mut msg = zmq::Message::new();
-
         let payload = file_io::read(db_path)?;
         socket.send(&payload, 0)?;
+
+        let mut msg = zmq::Message::new();
         socket.recv(&mut msg, 0)?;
 
         let path = msg.as_str();
@@ -275,13 +273,67 @@ impl Company {
                     result.push(name);
                 }
             }
-
             return Ok(Some(result))
         }
         else {
             return Ok(None);
         }
 
+    }
+
+    pub fn get_balance_summary(&self) -> Option<Vec<(&Account, f64)>> {
+        let accounts = self.get_accounts();
+
+        if accounts.is_none() {
+            return None;
+        }
+ 
+        let accounts = accounts.unwrap();
+
+        let ret = accounts
+            .iter()
+            .map(|account| {
+                let sum = self.get_account_balance(&account.id);
+                (*account, sum)
+            })
+            .collect();
+
+
+        Some(ret)
+    }
+
+    fn get_account_balance(&self, account_id: &String) -> f64 {
+        let transactions = self.get_transactions_by_account(account_id);
+
+        if transactions.is_none() {
+            return 0.0
+        }
+
+        let account = self.get_acccount_by_id(account_id).unwrap();
+        let is_debit = if account.r#type == "d" 
+            { true } else { false };
+
+        let transactions = transactions.unwrap();
+        let mut sum = 0.0;
+
+        for transaction in transactions.iter() {
+            let amount = transaction.amount.parse::<f64>().unwrap();
+
+            if is_debit && transaction.debit == account.id {
+                sum += amount;
+            }
+            else if is_debit && transaction.credit == account.id {
+                sum -= amount;
+            }
+            else if !is_debit && transaction.credit == account.id {
+                sum += amount;
+            }
+            else if !is_debit && transaction.debit == account.id {
+                sum -= amount;
+            }
+        }
+
+        sum
     }
 
 }

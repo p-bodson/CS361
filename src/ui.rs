@@ -255,56 +255,13 @@ fn fill_viewer(app: &mut App) -> Text {
 
     match app.focus {
         Focus::Charts => {
-            text.extend(Text::raw("Chart of Accounts"));
-            let chart = app.company.get_chart_of_accounts().unwrap();
-            for listing in chart {
-                let mut line = String::new();
-                let mut first = true;
-                for account in listing {
-                    if first {
-                        line = format!("{}", account.name);
-                        first = false;
-                    }
-                    else {
-                        line = format!("{} -> {}", account.name, line );
-                    }
-        
-                }
-                text.extend(Text::raw(line));
-            }
+            text = show_charts(app);
         },
         Focus::ExpenseReport => {
-
-            if !app.report_gen_done {
-                text.extend(Text::raw("Generating Expense Report at"));
-                let res = app.company.generate_expense_report(&app.db_path);
-                if res.is_err() {
-                    text.extend(Text::raw("error generating report")); 
-                }
-                else {
-                    let res = res.unwrap();
-                    if res.is_none() {
-                        text.extend(Text::raw("No Path To Report")); 
-                    }
-                    else {
-                        let path = res.unwrap();
-                        app.report_path = path.clone();
-                        text.extend(Text::raw(format!("{}", path.display())));
-                        text.extend(Text::raw("Locate the expense report at the above path"));
-                    }
-
-                }
-                app.report_gen_done = true;
-            }
-            else {
-                text.extend(Text::raw("Path to report is ..."));
-                let path = app.report_path.clone();
-                text.extend(Text::raw(format!("{}", path.display())));
-            }
-
+            text = show_expense_report(app);
         },
         Focus::BalanceSheet => {
-            text.extend(Text::raw("List the current balance for your portfolio"));
+            text = show_balance_sheet(app);
         },
         Focus::NewTransaction => {
             text.extend(Text::raw("Enter a new transaction"));
@@ -318,6 +275,120 @@ fn fill_viewer(app: &mut App) -> Text {
         Focus::Nothing => {
             app.report_gen_done = false;
         },
+    }
+
+    text
+}
+
+fn show_balance_sheet(app: &mut App) -> Text {
+    let mut text = Text::from("");
+
+    let balances = app.company.get_balance_summary();
+    if balances.is_none() {
+        text.extend(Text::raw("No balances to show"));
+        return text; 
+    }
+
+    text.extend(Text::raw("Balance Sheet"));
+    let balances = balances.unwrap();
+
+    // first print out the debits
+    // then the credits
+    let mut printed_debits = false;
+    let mut printed_credits = false;
+    let mut total_debits = 0.0;
+    let mut total_credits = 0.0;
+
+    for x in 0..2 {
+        for balance in &balances {
+            let (account, sum) = balance;
+            if account.r#type == "d" && x == 0 {
+                if !printed_debits {
+                    text.extend(Text::raw("Debits"));
+                    printed_debits = true;
+                }
+                let line = String::from(format!("{}\n    = {:.2}", account.name, sum));
+                text.extend(Text::raw(line));
+                total_debits += sum; 
+            }
+            else if account.r#type == "c" && x == 1 {
+                if !printed_credits {
+                    text.extend(Text::raw("Credits"));
+                    printed_credits = true;
+                }
+                let line = String::from(format!("{}\n    = {:.2}", account.name, sum));
+                text.extend(Text::raw(line));
+                total_credits += sum; 
+            }
+        }
+    }
+
+    text.extend(Text::raw(format!("Total Debits = {}", total_debits)));
+    text.extend(Text::raw(format!("Total Cedits = {}", total_credits)));
+
+    text
+}
+
+fn show_charts(app: &mut App) -> Text {
+
+    let mut text = Text::from("");
+
+    let chart = app.company.get_chart_of_accounts();
+    if chart.is_none() {
+        text.extend(Text::raw("No accounts to show"));
+        return text;
+    }
+
+    text.extend(Text::raw("Chart of Accounts"));
+    let chart = chart.unwrap();
+    for listing in chart {
+        let mut line = String::new();
+        let mut first = true;
+        for account in listing {
+            if first {
+                line = format!("{}", account.name);
+                first = false;
+            }
+            else {
+                line = format!("{} -> {}", account.name, line );
+            }
+
+        }
+        text.extend(Text::raw(line));
+    };
+
+    text
+}
+
+fn show_expense_report(app: &mut App) -> Text {
+   
+    let mut text = Text::from("");
+
+    if !app.report_gen_done {
+        text.extend(Text::raw("Generating Expense Report at"));
+        let res = app.company.generate_expense_report(&app.db_path);
+        if res.is_err() {
+            text.extend(Text::raw("error generating report")); 
+        }
+        else {
+            let res = res.unwrap();
+            if res.is_none() {
+                text.extend(Text::raw("No Path To Report")); 
+            }
+            else {
+                let path = res.unwrap();
+                app.report_path = path.clone();
+                text.extend(Text::raw(format!("{}", path.display())));
+                text.extend(Text::raw("Locate the expense report at the above path"));
+            }
+
+        }
+        app.report_gen_done = true;
+    }
+    else {
+        text.extend(Text::raw("Path to report is ..."));
+        let path = app.report_path.clone();
+        text.extend(Text::raw(format!("{}", path.display())));
     }
 
     text

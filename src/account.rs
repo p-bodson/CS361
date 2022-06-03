@@ -1,5 +1,6 @@
 use std::cmp::Ordering;
 use crate::company::Company;
+use crate::transaction::Transaction;
 
 // Accounts are entities that have Transactions
 #[derive(Debug, Serialize, Deserialize, Clone)]

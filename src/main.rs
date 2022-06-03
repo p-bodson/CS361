@@ -118,10 +118,4 @@ fn main() -> Result<(), Box<dyn Error>> {
     //     process::exit(1);
     // });
 
-    // ui::show_register("1", &company);
-    // ui::show_chart_of_accounts(&company);
-
-    // println!("");
-    // println!("{}", ui::welcome());
-
 }
