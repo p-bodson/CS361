@@ -7,9 +7,9 @@ use std::path::Path;
 
 pub fn read<P: AsRef<Path>>(file_path: P) -> io::Result<String> {
     let utf8_vector = fs::read(file_path.as_ref())?;
-    let foo = String::from_utf8_lossy(&utf8_vector).to_string();
+    let stringy = String::from_utf8_lossy(&utf8_vector).to_string();
 
-    Ok(foo)
+    Ok(stringy)
 }
 
 pub fn write(file_path: &str, thing_to_write: &str) -> io::Result<()> {

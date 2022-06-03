@@ -4,10 +4,16 @@ use std::path::PathBuf;
 
 #[derive(Debug, Parser)]
 pub struct Args {
-    #[clap(short = 'd', long, default_value = "data/db.json")]
+    #[clap(short = 'd', 
+        long,
+        default_value = "data/db.json",
+        help = "Specify path to database to load")]
     pub database: String,
     
-    #[clap(short = 't', long, default_value = "200")]
+    #[clap(short = 't', 
+        long, 
+        default_value = "200",
+        help = "Determines animation speeds in ms.  Default is fine in most cases")]
     pub tick_rate: u64
 }
 

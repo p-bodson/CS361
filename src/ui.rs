@@ -34,20 +34,6 @@ pub fn capture_input<'a>() -> io::Result<String> {
     Ok(output)
 }
 
-
-pub fn welcome() -> String {
-    format!("{}\n\n{}\n",
-        "Welcome to Money, the double-entry ledger app for counting your wealth.",
-        "Type the letter in the parentheses to perform the corresponding feature."
-    )      
-}
-
-pub fn farewell() -> String {
-    format!("{}\n",
-        "Thank you, goodbye."
-    )
-}
-
 pub fn show_register(account_id: &str, company: &Company) {
 
     let transactions = company.get_transactions_by_account(account_id);
@@ -124,9 +110,11 @@ where
             Style::default(),
         )
     };
+
     let mut text = Text::from(Spans::from(msg));
     text.patch_style(style);
     let help_message = Paragraph::new(text);
+
     f.render_widget(help_message, chunks[0]);
 }
 
@@ -157,6 +145,7 @@ where
         .label(label)
         .use_unicode(true);
     f.render_widget(gauge, chunks[0]);
+
 }
 
 fn draw_input<B>(f: &mut Frame<B>, app: &App, area: Rect) 
@@ -181,6 +170,7 @@ where
         InputMode::Editing => Style::default().fg(Color::Yellow),
     })
     .block(Block::default().borders(Borders::ALL).title("Input"));
+
     f.render_widget(input, chunks[0]);
 
     match app.input_mode {
@@ -202,6 +192,7 @@ fn draw_messages<B>(f: &mut Frame<B>, app: &mut App, area: Rect)
 where
     B: Backend,
 {
+    // make the layout
     let chunks = Layout::default()
         .direction(Direction::Horizontal)
         .margin(0)
@@ -214,18 +205,13 @@ where
         )
         .split(area);
 
-    let mut text = Text::from("(b) List the current balance for your portfolio\n");
-    text.extend(Text::raw("(t) Enter a new transaction\n"));
-    text.extend(Text::raw("(r) Examine the register for an account\n"));
-    text.extend(Text::raw("(d) Delete a transaction\n"));
-    text.extend(Text::raw("(l) List the chart of accounts\n"));
-    text.extend(Text::raw("(g) Generate an expense report\n"));
-    text.extend(Text::raw("(q) Quit the program\n"));
-
+    // print out the help text
+    let text = get_menu_text(app);
     let menu = Paragraph::new(text);
     f.render_widget(menu, chunks[0]);
 
 
+    // print out the message window
     let messages: Vec<ListItem> = app
         .messages
         .iter()
@@ -241,12 +227,25 @@ where
     f.render_widget(messages, chunks[2]);
 
 
-    // print out the accounts in a window
+    // print out the the main viewer
     let text = fill_viewer(app);
     let viewer = Paragraph::new(text)
         .block(Block::default().title("Viewer").borders(Borders::ALL))
         .wrap(Wrap { trim: false});
     f.render_widget(viewer, chunks[1]);
+
+}
+
+fn get_menu_text(app: &mut App) -> Text {
+    let mut text = Text::from("(b) List the current balance for your portfolio\n");
+    text.extend(Text::raw("(t) Enter a new transaction\n"));
+    text.extend(Text::raw("(r) Examine the register for an account\n"));
+    text.extend(Text::raw("(d) Delete a transaction\n"));
+    text.extend(Text::raw("(l) List the chart of accounts\n"));
+    text.extend(Text::raw("(g) Generate an expense report\n"));
+    text.extend(Text::raw("(q) Quit the program\n"));
+    
+    text
 }
 
 fn fill_viewer(app: &mut App) -> Text {

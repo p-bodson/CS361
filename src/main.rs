@@ -30,9 +30,6 @@ use tui::{
 
 use clap::Parser;
 
-use crate::company::Company;
-use crate::account::Account;
-use crate::transaction::Transaction;
 use crate::app::App;
 use crate::crossterm::run_app;
 use crate::config::{Config, Args};
@@ -71,51 +68,5 @@ fn main() -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
-
-    //let mut copy_accounts = company.accounts.clone();
-    //println!();
-
-    // company.sort_accounts("asc");
-
-    // for account in company.accounts.iter() {
-    //     println!("{} {} {} {} {:?} {:?}",
-    //         account.id,  
-    //         account.name,
-    //         account.r#type,
-    //         account.parent,
-    //         account.transactions,
-    //         account.subaccounts 
-    //     )
-    // }
-
-    // for transaction in company.transactions.iter() {
-    //     println!("{} {} {} {:?} {} {}",
-    //         transaction.id,
-    //         transaction.debit, 
-    //         transaction.credit,
-    //         transaction.date,      
-    //         transaction.amount,
-    //         transaction.memo
-
-    //     )
-    // }
-
-    // let mut new_account = Account::new();
-    // new_account.set_id_in_company(&mut company)
-    //            .set_parent("2")
-    //            .set_type_in_company("d", &company)
-    //            .set_name("Something");
-
-    // let mut new_transaction = Transaction::new();
-    // new_transaction.set_id_in_company(&mut company)
-    //                .set_credit("1")
-    //                .set_debit("2")
-    //                .set_amount("1002.33")
-    //                .set_memo("Hello");
-
-    // company.write_to(config.get_database()).unwrap_or_else(|err| {
-    //     eprintln!("Problem saving company database: {}", err);
-    //     process::exit(1);
-    // });
 
 }
